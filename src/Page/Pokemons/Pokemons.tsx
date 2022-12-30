@@ -1,5 +1,5 @@
 import { FC, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import Alert from "../Alert/Alert";
+import Alert from "../../components/Alert/Alert";
 import { useTypedDispatch, useTypedSelector } from "../../hooks";
 import { fetchPokemons } from "../../store/pokemons/actionCreators";
 import {
@@ -19,9 +19,10 @@ import {
 } from "@mui/material";
 import { findColor, findVariant } from "../../helper";
 import { Link, useNavigate } from "react-router-dom";
-import MultipleSelectChip from "../SelectType";
-import TablePaginationActions from "../Pagination/Pagination";
+import MultipleSelectChip from "../../components/SelectType";
+import TablePaginationActions from "../../components/Pagination/Pagination";
 import qs from "qs";
+import Snowfall from "react-snowfall";
 
 interface IQuery {
   rowsPerPage: string;
@@ -33,6 +34,14 @@ interface ISearchOption {
   page: number;
   rowsPerPage: number;
 }
+
+const tableCells = [
+  { title: "Name", key: 1 },
+  { title: "Image", key: 2 },
+  { title: "Types", key: 13 },
+  { title: "Height", key: 12 },
+  { title: "Weight", key: 11 },
+];
 
 const Pokemons: FC = () => {
   const dispatch = useTypedDispatch();
@@ -97,13 +106,12 @@ const Pokemons: FC = () => {
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  ) =>
     setSearchOption({
       ...searchOption,
       page: 0,
       rowsPerPage: Number(event.target.value),
     });
-  };
 
   const filterByTag = useMemo(() => {
     if (personName.length === 0) {
@@ -111,11 +119,11 @@ const Pokemons: FC = () => {
     }
 
     if (pokemons) {
-      return pokemons!.filter((pokemon) => {
-        return pokemon.types
+      return pokemons!.filter((pokemon) =>
+        pokemon.types
           .map((type) => personName.includes(type.type.name))
-          .some((type) => Boolean(type));
-      });
+          .some((type) => Boolean(type))
+      );
     }
 
     return [];
@@ -123,7 +131,7 @@ const Pokemons: FC = () => {
 
   return (
     <>
-      <TableContainer sx={{ mt: 10 }} component={Paper}>
+      <TableContainer sx={{ mt: 8 }} component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <MultipleSelectChip
@@ -132,17 +140,17 @@ const Pokemons: FC = () => {
             />
 
             <TableRow>
-              <TableCell>Name</TableCell>
-
-              <TableCell align="center">Image</TableCell>
-
-              <TableCell align="center">Types</TableCell>
-
-              <TableCell align="center">Height</TableCell>
-
-              <TableCell align="center">Width</TableCell>
+              {tableCells.map((cell, index) => (
+                <TableCell
+                  align={index > 0 ? "center" : undefined}
+                  key={cell.key}
+                >
+                  {cell.title}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
+
           {!loading && filterByTag && filterByTag.length > 0 ? (
             <TableBody>
               {filterByTag!.map((pokemon) => (
@@ -150,14 +158,14 @@ const Pokemons: FC = () => {
                   key={pokemon.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="col">
                     <Link to={`/pokemons/${pokemon.id}`}>
                       {pokemon.name.charAt(0).toUpperCase() +
                         pokemon.name.slice(1)}
                     </Link>
                   </TableCell>
 
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="col">
                     <Link to={`/pokemons/${pokemon.id}`}>
                       <img
                         src={pokemon.sprites.front_default}
@@ -166,9 +174,17 @@ const Pokemons: FC = () => {
                     </Link>
                   </TableCell>
 
-                  <TableCell component="th" scope="row">
+                  <TableCell component="th" scope="col">
                     {pokemon.types.map((typesPokemon, index) => (
-                      <Container key={index}>
+                      <Container
+                        sx={{
+                          padding: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        key={index}
+                      >
                         <Chip
                           sx={{ mt: 1 }}
                           label={typesPokemon.type.name}
@@ -179,12 +195,28 @@ const Pokemons: FC = () => {
                     ))}
                   </TableCell>
 
-                  <TableCell component="th" scope="row">
-                    {`${pokemon.height * 10} sm`}
+                  <TableCell component="th" scope="col">
+                    <Container
+                      sx={{
+                        display: "flex",
+                        height: "100%",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {`${pokemon.height * 10} sm`}
+                    </Container>
                   </TableCell>
 
-                  <TableCell component="th" scope="row">
-                    {`${pokemon.weight} kg`}
+                  <TableCell component="th" scope="col">
+                    <Container
+                      sx={{
+                        display: "flex",
+                        height: "100%",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {`${pokemon.weight} kg`}
+                    </Container>
                   </TableCell>
                 </TableRow>
               ))}

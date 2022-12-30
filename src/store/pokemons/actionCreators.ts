@@ -2,11 +2,15 @@ import { IPokemon } from "./pokemonsSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-interface IResponcePokemon {
+interface IResponcePokemons {
   count: number;
   next: string | null;
   previous: string | null;
   results: Array<{ name: string; url: string }>;
+}
+
+interface IResponcePokemon {
+  results: IPokemon;
 }
 
 interface IQuery {
@@ -18,7 +22,7 @@ export const fetchPokemons = createAsyncThunk(
   "pokemons/fetchAll",
   async (query: IQuery, thunkApi) => {
     try {
-      const pokemonsList = await axios.get<IResponcePokemon>(
+      const pokemonsList = await axios.get<IResponcePokemons>(
         `https://pokeapi.co/api/v2/pokemon?limit=${query.rowsPerPage}&offset=${
           query.rowsPerPage * query.page
         }`
@@ -35,6 +39,21 @@ export const fetchPokemons = createAsyncThunk(
         next: pokemonsList.data.next,
         previous: pokemonsList.data.previous,
       };
+    } catch (error) {
+      return;
+    }
+  }
+);
+
+export const fetchPokemon = createAsyncThunk(
+  "pokemon/fetch",
+  async (id: string, thunkApi) => {
+    try {
+      const pokemon = await axios.get<IResponcePokemon>(
+        `https://pokeapi.co/api/v2/pokemon/${id}`
+      );
+
+      return pokemon.data;
     } catch (error) {
       return;
     }

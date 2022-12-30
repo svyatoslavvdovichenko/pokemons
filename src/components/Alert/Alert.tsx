@@ -6,20 +6,18 @@ interface IAlert {
   message: string;
 }
 
-const Alert: FC<IAlert> = ({ message }) => {
-  return (
-    <Snackbar open autoHideDuration={600}>
-      <AlertMui
-        action={
-          <IconButton aria-label="close" color="inherit" size="small">
-            <CloseIcon fontSize="inherit" />
-          </IconButton>
-        }
-      >
-        {message}
-      </AlertMui>
-    </Snackbar>
-  );
-};
+const Alert: FC<IAlert> = ({ message }) => (
+  <Snackbar open autoHideDuration={600}>
+    <AlertMui
+      action={
+        <IconButton aria-label="close" color="inherit" size="small">
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
+      }
+    >
+      {message}
+    </AlertMui>
+  </Snackbar>
+);
 
 export default Alert;

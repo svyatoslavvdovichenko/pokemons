@@ -1,4 +1,4 @@
-import { fetchPokemons } from "./actionCreators";
+import { fetchPokemon, fetchPokemons } from "./actionCreators";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface IPokemon {
@@ -6,6 +6,13 @@ export interface IPokemon {
   name: string;
   sprites: {
     front_default: string;
+    back_default: string;
+    back_shiny: string;
+    front_shiny: string;
+    other: {
+      home: { front_default: string; front_shiny: string };
+      dream_world: { front_default: string };
+    };
   };
   types: [
     {
@@ -26,7 +33,10 @@ interface IPokemonsState {
     pokemons: IPokemon[] | [];
     loading: boolean;
   };
-  currentPokemon: IPokemon | null;
+  currentPokemon: {
+    pokemon: IPokemon;
+    isLoading: boolean;
+  };
 }
 
 const initialState: IPokemonsState = {
@@ -37,7 +47,10 @@ const initialState: IPokemonsState = {
     pokemons: [],
     loading: false,
   },
-  currentPokemon: null,
+  currentPokemon: {
+    pokemon: {} as IPokemon,
+    isLoading: false,
+  },
 };
 
 const pokemonsSlice = createSlice({
@@ -55,6 +68,17 @@ const pokemonsSlice = createSlice({
     },
     [fetchPokemons.rejected.type]: (state) => {
       state.pokemons.loading = false;
+    },
+
+    [fetchPokemon.fulfilled.type]: (state, action: PayloadAction<IPokemon>) => {
+      state.currentPokemon.isLoading = false;
+      state.currentPokemon.pokemon = action.payload;
+    },
+    [fetchPokemon.pending.type]: (state) => {
+      state.currentPokemon.isLoading = true;
+    },
+    [fetchPokemon.rejected.type]: (state) => {
+      state.currentPokemon.isLoading = false;
     },
   },
 });

@@ -5,6 +5,7 @@ import App from "./App";
 import store from "./store";
 import styled from "styled-components";
 import "./index.css";
+import Snowfall from "react-snowfall";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,6 +18,8 @@ const StyledApp = styled(App)`
 root.render(
   <BrowserRouter>
     <Provider store={store}>
+      <Snowfall style={{ zIndex: 1001 }} snowflakeCount={200} />
+
       <StyledApp />
     </Provider>
   </BrowserRouter>
