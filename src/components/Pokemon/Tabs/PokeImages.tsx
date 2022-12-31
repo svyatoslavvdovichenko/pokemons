@@ -1,28 +1,28 @@
-import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
-import { Button, MobileStepper } from "@mui/material";
-import { Box } from "@mui/system";
-import { FC, useCallback, useState } from "react";
-import styled from "styled-components";
-import { IPokemon } from "../../../store/pokemons/pokemonsSlice";
-
-interface IPokeImages {
-  pokemon: IPokemon;
-}
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { Button, MobileStepper } from '@mui/material';
+import { Box } from '@mui/system';
+import { FC, useCallback, useState } from 'react';
+import styled from 'styled-components';
+import { useTypedSelector } from '../../../hooks';
+import { IPokemon } from '../../../store/pokemons/pokemonsSlice';
 
 const StyledMobileStepper = styled(MobileStepper)`
   background-color: transparent !important;
 `;
 
-export const PokeImages: FC<IPokeImages> = ({ pokemon }) => {
+export const PokeImages: FC = () => {
+  const { pokemon, isLoading } = useTypedSelector(
+    state => state.pokemons.currentPokemon,
+  );
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = 6;
 
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setActiveStep(prevActiveStep => prevActiveStep - 1);
   };
 
   const pokemonImgs = useCallback(
@@ -44,19 +44,19 @@ export const PokeImages: FC<IPokeImages> = ({ pokemon }) => {
           break;
       }
     },
-    [activeStep]
+    [activeStep],
   );
 
   return (
-    <Box sx={{ flexGrow: 1, height: "100%" }}>
+    <Box sx={{ flexGrow: 1, height: '100%' }}>
       <StyledMobileStepper
-        variant="progress"
+        variant='progress'
         steps={maxSteps}
-        position="static"
+        position='static'
         activeStep={activeStep}
         nextButton={
           <Button
-            size="small"
+            size='small'
             onClick={handleNext}
             disabled={activeStep === maxSteps - 1}
           >
@@ -65,7 +65,7 @@ export const PokeImages: FC<IPokeImages> = ({ pokemon }) => {
           </Button>
         }
         backButton={
-          <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
+          <Button size='small' onClick={handleBack} disabled={activeStep === 0}>
             Back
             <KeyboardArrowLeft />
           </Button>
@@ -74,13 +74,13 @@ export const PokeImages: FC<IPokeImages> = ({ pokemon }) => {
       <Box
         sx={{
           height: 255,
-          width: "100%",
+          width: '100%',
           p: 2,
-          display: "flex",
-          justifyContent: "center",
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
-        <img src={pokemonImgs(pokemon)} alt="oops no this pokemon" />
+        <img src={pokemonImgs(pokemon)} alt='oops no this pokemon' />
       </Box>
     </Box>
   );

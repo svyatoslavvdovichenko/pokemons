@@ -1,5 +1,13 @@
-import { fetchPokemon, fetchPokemons } from "./actionCreators";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { fetchPokemon, fetchPokemons } from './actionCreators';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface IStats {
+  base_stat: number;
+  stat: {
+    name: string;
+    url: string;
+  };
+}
 
 export interface IPokemon {
   id: string;
@@ -19,8 +27,9 @@ export interface IPokemon {
       type: {
         name: string;
       };
-    }
+    },
   ];
+  stats: Array<IStats>;
   weight: number;
   height: number;
 }
@@ -42,8 +51,8 @@ interface IPokemonsState {
 const initialState: IPokemonsState = {
   pokemons: {
     count: 0,
-    next: "",
-    previous: "",
+    next: '',
+    previous: '',
     pokemons: [],
     loading: false,
   },
@@ -54,7 +63,7 @@ const initialState: IPokemonsState = {
 };
 
 const pokemonsSlice = createSlice({
-  name: "pokemons",
+  name: 'pokemons',
   initialState,
   reducers: {},
   extraReducers: {
@@ -63,10 +72,10 @@ const pokemonsSlice = createSlice({
       state.pokemons.count = action.payload.count;
       state.pokemons.pokemons = action.payload.pokemons;
     },
-    [fetchPokemons.pending.type]: (state) => {
+    [fetchPokemons.pending.type]: state => {
       state.pokemons.loading = true;
     },
-    [fetchPokemons.rejected.type]: (state) => {
+    [fetchPokemons.rejected.type]: state => {
       state.pokemons.loading = false;
     },
 
@@ -74,10 +83,11 @@ const pokemonsSlice = createSlice({
       state.currentPokemon.isLoading = false;
       state.currentPokemon.pokemon = action.payload;
     },
-    [fetchPokemon.pending.type]: (state) => {
+    [fetchPokemon.pending.type]: state => {
+      state.currentPokemon.pokemon = {} as IPokemon;
       state.currentPokemon.isLoading = true;
     },
-    [fetchPokemon.rejected.type]: (state) => {
+    [fetchPokemon.rejected.type]: state => {
       state.currentPokemon.isLoading = false;
     },
   },
