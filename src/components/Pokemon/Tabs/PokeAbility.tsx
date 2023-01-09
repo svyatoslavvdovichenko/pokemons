@@ -1,20 +1,22 @@
-import { FC, useState } from 'react';
+import { FC, useState } from "react";
 
-import { CatchingPokemon, CatchingPokemonTwoTone } from '@mui/icons-material';
+import { CatchingPokemon, CatchingPokemonTwoTone } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Collapse,
   Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2/Grid2';
+} from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
 
-import { capitalizeFirstLetter } from '../../../helper';
-import { useTypedSelector } from '../../../hooks';
+import { capitalizeFirstLetter } from "../../../helper";
+import { useTypedSelector } from "../../../hooks";
 
 export const PokeAbility: FC = () => {
-  const { pokemon } = useTypedSelector(state => state.pokemons.currentPokemon);
+  const { pokemon } = useTypedSelector(
+    (state) => state.pokemons.currentPokemon
+  );
 
   const [expanded, setExpanded] = useState<string | false>(false);
 
@@ -27,7 +29,7 @@ export const PokeAbility: FC = () => {
     <Grid container spacing={2}>
       <Grid xs={12}>
         {pokemon.abilities.map((ability, index) => (
-          <Grid key={ability.ability.name} sx={{ display: 'flex' }}>
+          <Grid key={ability.ability.name} sx={{ display: "flex" }}>
             <Accordion
               expanded={expanded === `panel${index + 1}`}
               onChange={handleChange(`panel${index + 1}`)}
@@ -40,8 +42,8 @@ export const PokeAbility: FC = () => {
                     <CatchingPokemonTwoTone />
                   )
                 }
-                aria-controls='panel1bh-content'
-                id='panel1bh-header'
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
               >
                 <Typography sx={{ pl: 1 }}>
                   {capitalizeFirstLetter(ability.ability.name!)}
@@ -52,7 +54,7 @@ export const PokeAbility: FC = () => {
                 <Typography>
                   {
                     ability.ability.detail.effect_entries!.find(
-                      entry => entry.language.name === 'en',
+                      (entry) => entry.language.name === "en"
                     )?.effect
                   }
                 </Typography>
@@ -61,7 +63,7 @@ export const PokeAbility: FC = () => {
           </Grid>
         ))}
 
-        <Collapse timeout='auto'>;jgf</Collapse>
+        <Collapse timeout="auto">;jgf</Collapse>
       </Grid>
     </Grid>
   );
