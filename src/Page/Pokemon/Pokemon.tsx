@@ -13,10 +13,13 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { FC, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled, { css } from 'styled-components';
+import { PokeAbility } from '../../components/Pokemon/Tabs/PokeAbility';
+import { PokeEvolutions } from '../../components/Pokemon/Tabs/PokeEvolutions';
 import { PokeImages } from '../../components/Pokemon/Tabs/PokeImages';
 import { PokeMainInfo } from '../../components/Pokemon/Tabs/PokeMainInfo';
 import { capitalizeFirstLetter } from '../../helper';
 import { useTypedDispatch, useTypedSelector } from '../../hooks';
+import { addGuessed } from '../../store/game/gameSlice';
 import { fetchPokemon } from '../../store/pokemons/actionCreators';
 
 interface IImage {
@@ -59,9 +62,17 @@ const a11yProps = (index: number) => ({
   'aria-controls': `full-width-tabpanel-${index}`,
 });
 
+const pokemonTabs = [
+  { title: 'Main', component: <PokeMainInfo />, key: 0 },
+  { title: 'Images', component: <PokeImages />, key: 1 },
+  { title: 'Ability', component: <PokeAbility />, key: 2 },
+  { title: 'Evolutions', component: <PokeEvolutions />, key: 3 },
+];
+
 const Pokemon: FC = () => {
   const { id } = useParams();
   const dispatch = useTypedDispatch();
+  const { countGuessed } = useTypedSelector(state => state.game);
   const { pokemon, isLoading } = useTypedSelector(
     state => state.pokemons.currentPokemon,
   );
@@ -73,9 +84,20 @@ const Pokemon: FC = () => {
     setCurrentTab(newValue);
   };
 
+  const checkPokemon = () => {
+    if (id && countGuessed.includes(Number(id))) {
+      setIsOpenGame(false);
+    } else {
+      setIsOpenGame(true);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       dispatch(fetchPokemon(id));
+      checkPokemon();
+      setCurrentTab(0);
+      setNamePokemon('');
     }
   }, [id, dispatch]);
 
@@ -85,26 +107,21 @@ const Pokemon: FC = () => {
     }
   }, [pokemon]);
 
-  const pokemonTabs = [
-    { title: 'Main', component: <PokeMainInfo />, key: 0 },
-    { title: 'Images', component: <PokeImages />, key: 1 },
-    { title: 'Ability', component: <>ffff</>, key: 2 },
-    { title: 'Evolutions', component: <>ffff</>, key: 3 },
-  ];
-
   const handleCheckPokemon = () => {
     if (
       namePokemon.length > 3 &&
       pokemon.name.toLowerCase().includes(namePokemon.toLowerCase().trim())
     ) {
       setIsOpenGame(false);
+      dispatch(addGuessed(Number(id)));
       return;
     }
+
     if (namePokemon.toLowerCase().trim() === pokemon.name.toLowerCase()) {
       setIsOpenGame(false);
+      dispatch(addGuessed(Number(id)));
       return;
     }
-    // dispatch(openError)
 
     setNamePokemon('');
   };
@@ -141,10 +158,12 @@ const Pokemon: FC = () => {
                   }}
                   onChange={event => setNamePokemon(event.target.value)}
                 />
+
                 <Button onClick={handleCheckPokemon}>Check me</Button>
               </>
             )}
           </StyledGridMain>
+
           {!isOpenGame && (
             <Grid xs={12} md={6}>
               <Tabs
@@ -163,6 +182,7 @@ const Pokemon: FC = () => {
                   />
                 ))}
               </Tabs>
+
               {pokemonTabs.map(content => (
                 <StyledContainer key={content.key}>
                   {currentTab === content.key && content.component}

@@ -1,9 +1,15 @@
-import { Container, Rating, Typography } from '@mui/material';
+import { Chip, Container, Rating, Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { Box } from '@mui/system';
-import { FC } from 'react';
-import { capitalizeFirstLetter } from '../../../helper';
+import React, { FC } from 'react';
+import { capitalizeFirstLetter, findColor, findVariant } from '../../../helper';
 import { useTypedSelector } from '../../../hooks';
+import styled from 'styled-components';
+
+const StyledChip = styled(Chip)`
+  span {
+    color: white;
+  }
+`;
 
 const labels: { [index: string]: string } = {
   0.5: 'Useless',
@@ -28,7 +34,7 @@ const getMark = (stat: number) => {
     return 5.5;
   }
 
-  for (let index = 0; index <= 5; index += 0.5) {
+  for (let index = 0; index <= 5 / 2; index += 0.5) {
     if (stat <= statCount) {
       return index;
     }
@@ -53,7 +59,7 @@ export const PokeMainInfo: FC = () => {
   return (
     <Grid container spacing={2}>
       {pokemon.stats.map(pokestat => (
-        <>
+        <React.Fragment key={pokestat.stat.name}>
           <Grid xs={4}>
             <Typography component='span'>
               {capitalizeFirstLetter(pokestat.stat.name)}
@@ -78,8 +84,42 @@ export const PokeMainInfo: FC = () => {
               <Typography>{labels[getMark(pokestat.base_stat)]}</Typography>
             </Grid>
           </Grid>
-        </>
+        </React.Fragment>
       ))}
+
+      <Grid xs={4}>
+        <Typography component='span'>Types</Typography>
+      </Grid>
+
+      <Grid xs={8} sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <Grid>
+          {pokemon.types.map(typesPokemon => (
+            <StyledChip
+              key={typesPokemon.type.name}
+              sx={{ mr: 1 }}
+              label={typesPokemon.type.name}
+              color={findColor(typesPokemon.type.name)}
+              variant={findVariant(typesPokemon.type.name)}
+            />
+          ))}
+        </Grid>
+      </Grid>
+
+      <Grid xs={4} sx={{ p: 2, pl: 1 }}>
+        <Typography component='span'>Height</Typography>
+      </Grid>
+
+      <Grid xs={2} sx={{ p: 2 }}>
+        <Typography component='span'>{`${pokemon.height * 10} sm`}</Typography>
+      </Grid>
+
+      <Grid xs={4} sx={{ p: 2 }}>
+        <Typography component='span'>Weight</Typography>
+      </Grid>
+
+      <Grid xs={2} sx={{ p: 2 }}>
+        <Typography component='span'>{`${pokemon.weight} kg`}</Typography>
+      </Grid>
     </Grid>
   );
 };

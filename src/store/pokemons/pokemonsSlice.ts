@@ -1,4 +1,8 @@
-import { fetchPokemon, fetchPokemons } from './actionCreators';
+import {
+  fetchPokemon,
+  fetchPokemonEvolutions,
+  fetchPokemons,
+} from './actionCreators';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface IStats {
@@ -9,8 +13,20 @@ interface IStats {
   };
 }
 
+export interface IAbilities {
+  ability: {
+    name?: string;
+    url: string;
+
+    detail: {
+      effect_entries?: Array<{ effect: string; language: { name: string } }>;
+    };
+  };
+}
+
 export interface IPokemon {
   id: string;
+  abilities: Array<IAbilities>;
   name: string;
   sprites: {
     front_default: string;
@@ -30,8 +46,12 @@ export interface IPokemon {
     },
   ];
   stats: Array<IStats>;
+  evolutions: { isLoading: boolean; evolutionList: IPokemon[] | null };
   weight: number;
   height: number;
+  species: {
+    url: string;
+  };
 }
 
 interface IPokemonsState {
@@ -57,7 +77,36 @@ const initialState: IPokemonsState = {
     loading: false,
   },
   currentPokemon: {
-    pokemon: {} as IPokemon,
+    pokemon: {
+      id: '',
+      abilities: [],
+      name: '',
+      sprites: {
+        front_default: '',
+        back_default: '',
+        back_shiny: '',
+        front_shiny: '',
+        other: {
+          home: { front_default: '', front_shiny: '' },
+          dream_world: { front_default: '' },
+        },
+      },
+      types: [
+        {
+          type: {
+            name: '',
+          },
+        },
+      ],
+      stats: [],
+      weight: 0,
+      height: 0,
+      species: {
+        url: '',
+      },
+      evolutions: { isLoading: false, evolutionList: null },
+    },
+
     isLoading: false,
   },
 };
@@ -81,7 +130,10 @@ const pokemonsSlice = createSlice({
 
     [fetchPokemon.fulfilled.type]: (state, action: PayloadAction<IPokemon>) => {
       state.currentPokemon.isLoading = false;
-      state.currentPokemon.pokemon = action.payload;
+      state.currentPokemon.pokemon = {
+        ...action.payload,
+        evolutions: { isLoading: false, evolutionList: null },
+      };
     },
     [fetchPokemon.pending.type]: state => {
       state.currentPokemon.pokemon = {} as IPokemon;
@@ -89,6 +141,22 @@ const pokemonsSlice = createSlice({
     },
     [fetchPokemon.rejected.type]: state => {
       state.currentPokemon.isLoading = false;
+    },
+
+    [fetchPokemonEvolutions.pending.type]: state => {
+      state.currentPokemon.pokemon.evolutions.evolutionList = null;
+      state.currentPokemon.pokemon.evolutions.isLoading = true;
+    },
+    [fetchPokemonEvolutions.fulfilled.type]: (
+      state,
+      action: PayloadAction<IPokemon[]>,
+    ) => {
+      state.currentPokemon.pokemon.evolutions.evolutionList = action.payload;
+      state.currentPokemon.pokemon.evolutions.isLoading = false;
+    },
+    [fetchPokemonEvolutions.rejected.type]: state => {
+      state.currentPokemon.pokemon.evolutions.evolutionList = null;
+      state.currentPokemon.pokemon.evolutions.isLoading = false;
     },
   },
 });
