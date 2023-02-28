@@ -25,7 +25,7 @@ export const PokeImages: FC = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1);
   };
 
-  const pokemonImgs = useCallback(
+  const getPokemonImage = useCallback(
     (pokemon: IPokemon) => {
       switch (activeStep) {
         case 0:
@@ -50,13 +50,13 @@ export const PokeImages: FC = () => {
   return (
     <Box sx={{ flexGrow: 1, height: '100%' }}>
       <StyledMobileStepper
-        variant='progress'
+        variant="progress"
         steps={maxSteps}
-        position='static'
+        position="static"
         activeStep={activeStep}
         nextButton={
           <Button
-            size='small'
+            size="small"
             onClick={handleNext}
             disabled={activeStep === maxSteps - 1}
           >
@@ -65,7 +65,7 @@ export const PokeImages: FC = () => {
           </Button>
         }
         backButton={
-          <Button size='small' onClick={handleBack} disabled={activeStep === 0}>
+          <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
             Back
             <KeyboardArrowLeft />
           </Button>
@@ -80,7 +80,7 @@ export const PokeImages: FC = () => {
           justifyContent: 'center',
         }}
       >
-        <img src={pokemonImgs(pokemon)} alt='oops no this pokemon' />
+        <img src={getPokemonImage(pokemon)} alt="oops no this pokemon" />
       </Box>
     </Box>
   );

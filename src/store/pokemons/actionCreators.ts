@@ -1,6 +1,7 @@
-import { IAbilities, IPokemon } from './pokemonsSlice';
+import { IPokemon } from './pokemonsSlice';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { flattenDeep } from 'lodash';
 
 interface IResponcePokemons {
   count: number;
@@ -35,11 +36,14 @@ export const fetchPokemons = createAsyncThunk(
           query.rowsPerPage * query.page
         }`,
       );
-      let pokemons: IPokemon[] = [];
-      for (let index = 0; index < pokemonsList.data.results.length; index++) {
-        const pokemon = await axios.get(pokemonsList.data.results[index].url);
-        pokemons.push(pokemon.data);
-      }
+
+      const promiseArray = pokemonsList.data.results.map(pokemon =>
+        axios.get<IPokemon>(pokemon.url),
+      );
+
+      const responses = await Promise.all(promiseArray);
+
+      const pokemons = responses.map(response => response.data);
 
       return {
         pokemons,
@@ -57,21 +61,23 @@ export const fetchPokemon = createAsyncThunk(
   'pokemon/fetch',
   async (id: string, thunkApi) => {
     try {
-      const response = await axios.get<IPokemon>(
+      const pokemon = await axios.get<IPokemon>(
         `https://pokeapi.co/api/v2/pokemon/${id}`,
       );
 
-      let abilitiesDetail = [];
-
-      for (let index = 0; index < response.data.abilities.length; index++) {
-        const ability = await axios.get<{
+      const promisesAbility = pokemon.data.abilities.map(ability =>
+        axios.get<{
           effect_entries: Array<{ effect: string; language: { name: string } }>;
-        }>(response.data.abilities[index].ability.url);
+        }>(ability.ability.url),
+      );
 
-        response.data.abilities[index].ability.detail = ability.data;
-      }
+      const pokemonAbilities = await Promise.all(promisesAbility);
 
-      return response.data;
+      pokemonAbilities.forEach((ability, index) => {
+        pokemon.data.abilities[index].ability.detail = ability.data;
+      });
+
+      return pokemon.data;
     } catch (error) {
       return;
     }
@@ -82,7 +88,6 @@ export const fetchPokemonEvolutions = createAsyncThunk(
   'pokemonEvolution/fetch',
   async (url: string, thunkApi) => {
     try {
-      console.log(1);
       const pokeSpecies = await axios.get<{ evolution_chain: { url: string } }>(
         url,
       );
@@ -99,31 +104,34 @@ export const fetchPokemonEvolutions = createAsyncThunk(
 
       pokemonEvolutionList.push(firstPokemon.data);
 
-      for (
-        let index = 0;
-        index < pokemonEvolution.data.chain.evolves_to.length;
-        index++
-      ) {
-        const response = await axios.get<IPokemon>(
-          `https://pokeapi.co/api/v2/pokemon/${pokemonEvolution.data.chain.evolves_to[index].species.name}`,
-        );
+      const pokemonEvolutionsPromises =
+        pokemonEvolution.data.chain.evolves_to.map(evolution => {
+          const evolves = [];
 
-        pokemonEvolutionList.push(response.data);
-
-        for (
-          let j = 0;
-          j < pokemonEvolution.data.chain.evolves_to[index].evolves_to.length;
-          j++
-        ) {
-          const response = await axios.get(
-            `https://pokeapi.co/api/v2/pokemon/${pokemonEvolution.data.chain.evolves_to[index].evolves_to[j].species.name}`,
+          evolves.push(
+            axios.get<IPokemon>(
+              `https://pokeapi.co/api/v2/pokemon/${evolution.species.name}`,
+            ),
           );
 
-          pokemonEvolutionList.push(response.data);
-        }
-      }
+          evolution.evolves_to.forEach(evolution =>
+            evolves.push(
+              axios.get<IPokemon>(
+                `https://pokeapi.co/api/v2/pokemon/${evolution.species.name}`,
+              ),
+            ),
+          );
 
-      return pokemonEvolutionList;
+          return evolves;
+        });
+
+      return await Promise.all(flattenDeep(pokemonEvolutionsPromises))
+        .then(responses => {
+          const pokemons = responses.map(response => response.data);
+
+          return pokemonEvolutionList.concat(pokemons);
+        })
+        .catch(err => console.log('err', err));
     } catch (error) {
       console.log(error);
       return;

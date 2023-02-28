@@ -1,20 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
-import { useNavigate } from "react-router-dom";
-import { useTypedDispatch, useTypedSelector } from "../../../hooks";
+import { useNavigate } from 'react-router-dom';
+import { useTypedDispatch, useTypedSelector } from '../../../hooks';
 
-import { Skeleton } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { fetchPokemonEvolutions } from "../../../store/pokemons/actionCreators";
-import { PokeEvolutionCard } from "../PokeEvolutionCard";
-import { Box } from "@mui/system";
+import { Skeleton } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import { fetchPokemonEvolutions } from '../../../store/pokemons/actionCreators';
+import { PokeEvolutionCard } from '../PokeEvolutionCard';
+import { Box } from '@mui/system';
 
 export const PokeEvolutions = () => {
   const dispatch = useTypedDispatch();
   const navigate = useNavigate();
-  const { pokemon } = useTypedSelector(
-    (state) => state.pokemons.currentPokemon
-  );
+  const { pokemon } = useTypedSelector(state => state.pokemons.currentPokemon);
 
   useEffect(() => {
     if (!pokemon.evolutions.evolutionList) {
@@ -29,13 +27,13 @@ export const PokeEvolutions = () => {
   return (
     <Grid container spacing={2}>
       {pokemon.evolutions.isLoading
-        ? Array.from("pok").map((_, index) => (
+        ? Array.from('pok').map((_, index) => (
             <Grid xs={4} key={index}>
               <Skeleton
                 animation="wave"
                 variant="rectangular"
                 width={210}
-                height={118}
+                height={120}
               />
 
               <Box sx={{ pt: 0.5 }}>
@@ -45,7 +43,7 @@ export const PokeEvolutions = () => {
               </Box>
             </Grid>
           ))
-        : pokemon.evolutions.evolutionList?.map((pokemonEvolution) => (
+        : pokemon.evolutions.evolutionList?.map(pokemonEvolution => (
             <Grid xs={4} key={pokemonEvolution.id}>
               <PokeEvolutionCard
                 pokemonEvolution={pokemonEvolution}

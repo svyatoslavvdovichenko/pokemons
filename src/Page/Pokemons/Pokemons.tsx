@@ -1,5 +1,4 @@
-import { FC, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import Alert from '../../components/Alert/Alert';
+import { FC, useEffect, useMemo } from 'react';
 import { useTypedDispatch, useTypedSelector } from '../../hooks';
 import { fetchPokemons } from '../../store/pokemons/actionCreators';
 import {
@@ -18,124 +17,108 @@ import {
   Backdrop,
 } from '@mui/material';
 import { findColor, findVariant } from '../../helper';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import MultipleSelectChip from '../../components/SelectType';
 import TablePaginationActions from '../../components/Pagination/Pagination';
 import qs from 'qs';
 
-interface IQuery {
-  rowsPerPage: string;
-  currentPage: string;
-  typePokemon: string[];
-}
-
-interface ISearchOption {
-  page: number;
-  rowsPerPage: number;
-}
-
 const tableCells = [
   { title: 'Name', key: 1 },
   { title: 'Image', key: 2 },
-  { title: 'Types', key: 13 },
-  { title: 'Height', key: 12 },
-  { title: 'Weight', key: 11 },
+  { title: 'Types', key: 3 },
+  { title: 'Height', key: 4 },
+  { title: 'Weight', key: 5 },
 ];
 
 const Pokemons: FC = () => {
   const dispatch = useTypedDispatch();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const { count, pokemons, loading } = useTypedSelector(
     state => state.pokemons.pokemons,
   );
-  const [searchOption, setSearchOption] = useState<ISearchOption>({
-    page: 0,
-    rowsPerPage: 10,
-  });
-  const [personName, setPersonName] = useState<string[]>([]);
-
-  useLayoutEffect(() => {
-    if (window.location.search) {
-      const params = qs.parse(
-        window.location.search.substring(1),
-      ) as unknown as IQuery;
-
-      if (params.rowsPerPage) {
-        setSearchOption({
-          ...searchOption,
-          rowsPerPage: Number(params.rowsPerPage),
-        });
-      }
-
-      if (params.currentPage) {
-        setSearchOption({
-          ...searchOption,
-          page: Number(params.currentPage),
-        });
-      }
-
-      if (params.typePokemon) {
-        setPersonName(params.typePokemon);
-      }
-    }
-  }, []);
 
   useEffect(() => {
-    if (searchOption) {
-      dispatch(fetchPokemons({ ...searchOption }));
+    if (searchParams) {
+      dispatch(
+        fetchPokemons({
+          rowsPerPage: Number(searchParams.get('rowsPerPage') ?? 10),
+          page: Number(searchParams.get('page') ?? 1),
+        }),
+      );
     }
-  }, [searchOption, dispatch]);
+  }, [searchParams, dispatch]);
 
-  useLayoutEffect(() => {
-    const queryString = qs.stringify({
-      currentPage: searchOption.page,
-      rowsPerPage: searchOption.rowsPerPage,
-      typePokemon: personName,
-    });
-
-    navigate(`?${queryString}`);
-  }, [searchOption, navigate, personName]);
+  useEffect(() => {
+    if (!searchParams) {
+      setSearchParams(
+        qs.stringify({
+          page: 0,
+          rowsPerPage: 10,
+        }),
+      );
+    }
+  }, []);
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null,
     newPage: number,
   ) => {
-    setSearchOption({ ...searchOption, page: newPage });
+    setSearchParams(prev => ({
+      ...prev,
+      rowsPerPage: searchParams.get('rowsPerPage') ?? 10,
+      page: newPage,
+      types: searchParams.get('types') ?? '',
+    }));
   };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) =>
-    setSearchOption({
-      ...searchOption,
-      page: 0,
+    setSearchParams(prev => ({
+      ...prev,
+      types: searchParams.get('types') ?? '',
+      page: 1,
       rowsPerPage: Number(event.target.value),
-    });
+    }));
 
   const filterByTag = useMemo(() => {
-    if (personName.length === 0) {
+    if (
+      Object.values(qs.parse(searchParams.get('types') ?? ''))?.length === 0
+    ) {
       return pokemons;
     }
 
     if (pokemons) {
       return pokemons!.filter(pokemon =>
         pokemon.types
-          .map(type => personName.includes(type.type.name))
+          .map(type => searchParams.get('types')?.includes(type.type.name))
           .some(type => Boolean(type)),
       );
     }
 
     return [];
-  }, [personName, pokemons]);
+  }, [searchParams, pokemons]);
 
   return (
     <>
       <TableContainer sx={{ mt: 8 }} component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <MultipleSelectChip
-              setPersonName={setPersonName}
-              personName={personName}
+              setPersonName={types => {
+                setSearchParams(prev => ({
+                  ...prev,
+                  rowsPerPage: Number(searchParams.get('rowsPerPage')),
+                  page: Number(searchParams.get('page')),
+                  types: qs.stringify(types),
+                }));
+              }}
+              personName={
+                Object.values(
+                  qs.parse(searchParams.get('types') ?? ''),
+                ) as string[]
+              }
             />
 
             <TableRow>
@@ -157,14 +140,14 @@ const Pokemons: FC = () => {
                   key={pokemon.id}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell component='th' scope='col'>
+                  <TableCell component="th" scope="col">
                     <Link to={`/pokemons/${pokemon.id}`}>
                       {pokemon.name.charAt(0).toUpperCase() +
                         pokemon.name.slice(1)}
                     </Link>
                   </TableCell>
 
-                  <TableCell component='th' scope='col'>
+                  <TableCell component="th" scope="col">
                     <Link to={`/pokemons/${pokemon.id}`}>
                       <img
                         src={pokemon.sprites.front_default}
@@ -173,7 +156,7 @@ const Pokemons: FC = () => {
                     </Link>
                   </TableCell>
 
-                  <TableCell component='th' scope='col'>
+                  <TableCell component="th" scope="col">
                     {pokemon.types.map((typesPokemon, index) => (
                       <Container
                         sx={{
@@ -194,7 +177,7 @@ const Pokemons: FC = () => {
                     ))}
                   </TableCell>
 
-                  <TableCell component='th' scope='col'>
+                  <TableCell component="th" scope="col">
                     <Container
                       sx={{
                         display: 'flex',
@@ -206,7 +189,7 @@ const Pokemons: FC = () => {
                     </Container>
                   </TableCell>
 
-                  <TableCell component='th' scope='col'>
+                  <TableCell component="th" scope="col">
                     <Container
                       sx={{
                         display: 'flex',
@@ -225,7 +208,7 @@ const Pokemons: FC = () => {
               sx={{ color: '#fff', zIndex: theme => theme.zIndex.drawer + 1 }}
               open={loading}
             >
-              <CircularProgress color='inherit' />
+              <CircularProgress color="inherit" />
             </Backdrop>
           )}
 
@@ -235,9 +218,9 @@ const Pokemons: FC = () => {
                 rowsPerPageOptions={[5, 10, 20]}
                 count={count!}
                 ActionsComponent={TablePaginationActions}
-                page={searchOption.page}
-                rowsPerPage={searchOption.rowsPerPage}
-                color='secondary'
+                page={Number(searchParams.get('page'))}
+                rowsPerPage={Number(searchParams.get('rowsPerPage'))}
+                color="secondary"
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
@@ -245,7 +228,6 @@ const Pokemons: FC = () => {
           </TableFooter>
         </Table>
       </TableContainer>
-      <Alert message='error' />
     </>
   );
 };

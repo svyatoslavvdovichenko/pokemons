@@ -10,7 +10,7 @@ import { chip } from '../../constaints';
 import { findColor, findVariant } from '../../helper';
 
 interface IMultipleSelectChip {
-  personName: string[];
+  personName: string[] | null;
   setPersonName: (string: string[]) => void;
 }
 
@@ -22,42 +22,42 @@ const MultipleSelectChip: FC<IMultipleSelectChip> = ({
     const {
       target: { value },
     } = event;
-    setPersonName(typeof value === 'string' ? value.split(',') : value);
+    if (value) {
+      setPersonName(typeof value === 'string' ? [value] : value);
+    }
   };
 
   return (
-    <>
-      <FormControl sx={{ m: 1, width: 300 }}>
-        <InputLabel id='demo-multiple-chip-label'>Pokemon types</InputLabel>
+    <FormControl sx={{ m: 1, width: 300 }}>
+      <InputLabel id="demo-multiple-chip-label">Pokemon types</InputLabel>
 
-        <Select
-          labelId='demo-multiple-chip-label'
-          id='demo-multiple-chip'
-          multiple
-          value={personName}
-          onChange={handleChange}
-          input={<OutlinedInput id='select-multiple-chip' label='Chip' />}
-          renderValue={selected => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map(value => (
-                <Chip
-                  color={findColor(value)}
-                  variant={findVariant(value)}
-                  key={value}
-                  label={value}
-                />
-              ))}
-            </Box>
-          )}
-        >
-          {chip.map((el, index) => (
-            <MenuItem key={index} value={el.name}>
-              {el.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </>
+      <Select
+        labelId="demo-multiple-chip-label"
+        id="demo-multiple-chip"
+        multiple
+        value={personName}
+        onChange={handleChange}
+        input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+        renderValue={selected => (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {selected?.map(value => (
+              <Chip
+                color={findColor(value)}
+                variant={findVariant(value)}
+                key={value}
+                label={value}
+              />
+            ))}
+          </Box>
+        )}
+      >
+        {chip.map((el, index) => (
+          <MenuItem key={index} value={el.name}>
+            {el.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 };
 
