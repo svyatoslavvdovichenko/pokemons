@@ -4,5 +4,15 @@
       "source": "/(.*)",
       "destination": "/"
     }
+  ],
+  "routes": [
+    {
+      "src": "/pokemons/",
+      "dest": "/"
+    },
+    {
+      "src": "*",
+      "dest": "/"
+    }
   ]
 }
