@@ -1,5 +1,4 @@
 import { AppBar, Box, Toolbar, Typography } from '@mui/material';
-import { Container } from '@mui/system';
 import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTypedSelector } from '../../hooks';
@@ -23,7 +22,7 @@ const RANGS = [
       countCatching >= 1 && countCatching < 10,
     rang: 'Beginner',
     prize:
-      'https://img.game8.co/3413659/9aa71ce40aaf0290d070ddbf67ada1e7.png/show',
+      'https://img.game8.co/3413658/001ecd4f3f61e5a6633f64731cf0df40.png/show',
   },
   {
     key: 2,
@@ -31,7 +30,7 @@ const RANGS = [
       countCatching >= 10 && countCatching < 25,
     rang: 'Great',
     prize:
-      'https://img.game8.co/3413658/001ecd4f3f61e5a6633f64731cf0df40.png/show',
+      'https://img.game8.co/3413659/9aa71ce40aaf0290d070ddbf67ada1e7.png/show',
   },
   {
     key: 3,
@@ -86,7 +85,7 @@ const Layout: FC<ILayout> = ({ children }) => {
             <div style={{ display: 'flex' }}>
               {getCurrentRang() && (
                 <img
-                  style={{ width: 40 }}
+                  style={{ width: 40, marginRight: 12 }}
                   alt={getCurrentRang()?.rang}
                   src={getCurrentRang()?.prize}
                 />

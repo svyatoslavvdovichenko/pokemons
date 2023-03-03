@@ -43,7 +43,7 @@ const Pokemons: FC = () => {
       dispatch(
         fetchPokemons({
           rowsPerPage: Number(searchParams.get('rowsPerPage') ?? 10),
-          page: Number(searchParams.get('page') ?? 1),
+          page: Number(searchParams.get('page') ?? 0),
         }),
       );
     }
@@ -78,7 +78,7 @@ const Pokemons: FC = () => {
     setSearchParams(prev => ({
       ...prev,
       types: searchParams.get('types') ?? '',
-      page: 1,
+      page: 0,
       rowsPerPage: Number(event.target.value),
     }));
 
@@ -109,8 +109,8 @@ const Pokemons: FC = () => {
               setPersonName={types => {
                 setSearchParams(prev => ({
                   ...prev,
-                  rowsPerPage: Number(searchParams.get('rowsPerPage')),
-                  page: Number(searchParams.get('page')),
+                  rowsPerPage: Number(searchParams.get('rowsPerPage') ?? 10),
+                  page: 0,
                   types: qs.stringify(types),
                 }));
               }}
@@ -218,8 +218,8 @@ const Pokemons: FC = () => {
                 rowsPerPageOptions={[5, 10, 20]}
                 count={count!}
                 ActionsComponent={TablePaginationActions}
-                page={Number(searchParams.get('page'))}
-                rowsPerPage={Number(searchParams.get('rowsPerPage'))}
+                page={Number(searchParams.get('page') ?? 0)}
+                rowsPerPage={Number(searchParams.get('rowsPerPage') ?? 10)}
                 color="secondary"
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
