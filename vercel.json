@@ -1,18 +1,9 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ],
   "routes": [
     {
-      "src": "/pokemons/",
-      "dest": "/"
-    },
-    {
-      "src": "*",
-      "dest": "/"
+      "src": "/[^.]+",
+      "dest": "/",
+      "status": 200
     }
   ]
 }
